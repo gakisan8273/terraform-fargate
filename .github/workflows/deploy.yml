@@ -24,3 +24,13 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.PROD_AWS_ASSUME_ROLE_ARN }}
           role-duration-seconds: 1800
+
+      - name: Set env vars for prod
+        # if: github.ref == 'refs/heads/main'
+        run: echo "ENV_NAME=prod" >> $GITHUB_ENV
+
+        - uses: actions/checkout@v2
+
+        - run: docker-compose up -d --build app web
+
+        - run: docker-compose exec -T app composer install -n --prefer-dist --no-dev
