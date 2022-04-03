@@ -29,8 +29,16 @@ jobs:
         # if: github.ref == 'refs/heads/main'
         run: echo "ENV_NAME=prod" >> $GITHUB_ENV
 
-        - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-        - run: docker-compose up -d --build app web
+      - run: docker-compose up -d --build app web
 
-        - run: docker-compose exec -T app composer install -n --prefer-dist --no-dev
+      - name: Cache composer
+        id: cache-composer
+        uses: actions/cache@v2
+        with:
+          path: backend/vendor
+          key: composer-v1-${{ hashFiles('backend/composer.lock') }}
+
+      - run: docker-compose exec -T app composer install -n --prefer-dist --no-dev
+        if: ${{ !steps.cache-composer.outputs.cache-hit }}
